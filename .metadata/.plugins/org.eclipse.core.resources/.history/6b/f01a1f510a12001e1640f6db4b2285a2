@@ -1,0 +1,63 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import br.com.pedidos.entity.Pedido;
+import br.com.pedidos.repository.PedidoRepository;
+import br.com.pedidos.service.impl.PedidoServiceImpl;
+
+@ExtendWith(MockitoExtension.class)
+public class PedidoServiceTest {
+
+    @Mock
+    private PedidoRepository pedidoRepository;
+
+    @InjectMocks
+    private PedidoServiceImpl pedidoService;
+
+    @Test
+    public void testConsultarPedidosByNumeroPedido() {
+        String numeroPedido = "123";
+
+        List<Pedido> pedidosMock = new ArrayList<>();
+        Pedido pedidoMock = new Pedido();
+        pedidoMock.setNumeroControle(numeroPedido);
+        pedidosMock.add(pedidoMock);
+
+        when(pedidoRepository.findAll()).thenReturn(pedidosMock);
+
+        ResponseEntity<List<Pedido>> response = pedidoService.consultarPedidos(numeroPedido, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(pedidosMock, response.getBody());
+    }
+
+    @Test
+    public void testConsultarPedidosByDataCadastro() {
+        String dataCadastro = "2023-06-22";
+        Date dataMock = new Date();
+
+        List<Pedido> pedidosMock = new ArrayList<>();
+        Pedido pedidoMock = new Pedido();
+        pedidoMock.setDataCadastro(dataMock);
+        pedidosMock.add(pedidoMock);
+
+        when(pedidoRepository.findByDataCadastro(dataMock)).thenReturn(pedidosMock);
+
+        ResponseEntity<List<Pedido>> response = pedidoService.consultarPedidos(null, dataCadastro);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(pedidosMock, response.getBody());
+    }
+}

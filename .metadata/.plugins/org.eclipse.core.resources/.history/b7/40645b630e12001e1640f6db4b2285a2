@@ -1,0 +1,101 @@
+package br.com.pedidos;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import br.com.pedidos.entity.Pedido;
+import br.com.pedidos.repository.PedidoRepository;
+import br.com.pedidos.service.impl.PedidoServiceImpl;
+
+@ExtendWith(MockitoExtension.class)
+public class PedidoServiceImplTest {
+
+    @Mock
+    private PedidoRepository pedidoRepository;
+
+    @InjectMocks
+    private PedidoServiceImpl pedidoService;
+    
+    @Test
+    public void testReceberPedidos() {
+        Pedido pedido1 = new Pedido();
+        pedido1.setNumeroControle("123");
+        pedido1.setDataCadastro(null);
+        pedido1.setQuantidade(2);
+        pedido1.setValor(10.0);
+        pedido1.setCodigoCliente(1);
+
+        Pedido pedido2 = new Pedido();
+        pedido2.setNumeroControle("456");
+        pedido2.setDataCadastro(new Date());
+        pedido2.setQuantidade(8);
+        pedido2.setValor(5.0);
+        pedido1.setCodigoCliente(2);
+
+        List<Pedido> pedidos = new ArrayList<>();
+        pedidos.add(pedido1);
+        pedidos.add(pedido2);
+
+        when(pedidoRepository.findByNumeroControle("123")).thenReturn(Optional.empty());
+        when(pedidoRepository.findByNumeroControle("456")).thenReturn(Optional.empty());
+
+        ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Pedido recebido. Número de controle: 123", response.getBody());
+
+        verify(pedidoRepository).save(pedido1);
+        verify(pedidoRepository).save(pedido2);
+    }
+
+    @Test
+    public void testConsultarPedidosByNumeroPedido() {
+        String numeroPedido = "123";
+
+        List<Pedido> pedidosMock = new ArrayList<>();
+        Pedido pedidoMock = new Pedido();
+        pedidoMock.setNumeroControle(numeroPedido);
+        pedidosMock.add(pedidoMock);
+
+        when(pedidoRepository.findAll()).thenReturn(pedidosMock);
+
+        ResponseEntity<List<Pedido>> response = pedidoService.consultarPedidos(numeroPedido, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(pedidosMock, response.getBody());
+    }
+
+    @Test
+    public void testConsultarPedidosByDataCadastro() throws ParseException {
+        String dataCadastro = "2023-06-22";
+        Date dataMock = new SimpleDateFormat("yyyy-MM-dd").parse(dataCadastro);
+
+        List<Pedido> pedidosMock = new ArrayList<>();
+        Pedido pedidoMock = new Pedido();
+        pedidoMock.setDataCadastro(dataMock);
+        pedidosMock.add(pedidoMock);
+
+        when(pedidoRepository.findByDataCadastro(dataMock)).thenReturn(pedidosMock);
+
+        ResponseEntity<List<Pedido>> response = pedidoService.consultarPedidos(null, dataCadastro);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(pedidosMock, response.getBody());
+    }
+}

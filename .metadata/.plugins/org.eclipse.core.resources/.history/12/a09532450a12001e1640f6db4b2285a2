@@ -1,0 +1,89 @@
+package br.com.pedidos;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import br.com.pedidos.entity.Pedido;
+import br.com.pedidos.repository.PedidoRepository;
+import br.com.pedidos.service.impl.PedidoServiceImpl;
+
+@ExtendWith(MockitoExtension.class)
+public class PedidoServiceImplTest {
+
+    @Mock
+    private PedidoRepository pedidoRepository;
+
+    @InjectMocks
+    private PedidoServiceImpl pedidoService;
+
+    @Test
+    public void testConsultarPedidosPorNumeroPedido() {
+        String numeroPedido = "123";
+
+        Pedido pedido = new Pedido();
+        pedido.setNumeroControle(numeroPedido);
+
+        List<Pedido> pedidos = new ArrayList<>();
+        pedidos.add(pedido);
+
+        when(pedidoRepository.findAll()).thenReturn(pedidos);
+
+        ResponseEntity<List<Pedido>> responseEntity = pedidoService.consultarPedidos(numeroPedido, null);
+
+        Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assert.assertEquals(pedidos, responseEntity.getBody());
+
+        verify(pedidoRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testConsultarPedidosPorDataCadastro() throws ParseException {
+        String dataCadastro = "2023-06-30";
+        Date data = new SimpleDateFormat("yyyy-MM-dd").parse(dataCadastro);
+
+        Pedido pedido = new Pedido();
+        pedido.setDataCadastro(data);
+
+        List<Pedido> pedidos = new ArrayList<>();
+        pedidos.add(pedido);
+
+        when(pedidoRepository.findByDataCadastro(data)).thenReturn(pedidos);
+
+        ResponseEntity<List<Pedido>> responseEntity = pedidoService.consultarPedidos(null, dataCadastro);
+
+        Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assert.assertEquals(pedidos, responseEntity.getBody());
+
+        verify(pedidoRepository, times(1)).findByDataCadastro(data);
+    }
+
+    @Test
+    public void testConsultarPedidosSemFiltros() {
+        List<Pedido> pedidos = new ArrayList<>();
+
+        when(pedidoRepository.findAll()).thenReturn(pedidos);
+
+        ResponseEntity<List<Pedido>> responseEntity = pedidoService.consultarPedidos(null, null);
+
+        Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assert.assertEquals(pedidos, responseEntity.getBody());
+
+        verify(pedidoRepository, times(1)).findAll();
+    }
+}

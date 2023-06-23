@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="PedidoServiceImplTest" project="pedidos" tests="3" started="3" failures="0" errors="0" ignored="0">
+  <testsuite name="br.com.pedidos.PedidoServiceImplTest" time="0.663" displayname="PedidoServiceImplTest" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]">
+    <testcase name="testReceberPedidos" classname="br.com.pedidos.PedidoServiceImplTest" time="0.645" displayname="testReceberPedidos()" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]/[method:testReceberPedidos()]"/>
+    <testcase name="testConsultarPedidosByNumeroPedido" classname="br.com.pedidos.PedidoServiceImplTest" time="0.002" displayname="testConsultarPedidosByNumeroPedido()" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]/[method:testConsultarPedidosByNumeroPedido()]"/>
+    <testcase name="testConsultarPedidosByDataCadastro" classname="br.com.pedidos.PedidoServiceImplTest" time="0.014" displayname="testConsultarPedidosByDataCadastro()" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]/[method:testConsultarPedidosByDataCadastro()]"/>
+  </testsuite>
+</testrun>
