@@ -28,27 +28,28 @@ public class PedidoServiceImpl implements PedidoService {
 	private List<Pedido> pedidos = new ArrayList<>();
 
 	public ResponseEntity<String> receberPedidos(List<Pedido> pedidos) {
-		StringBuilder responseBuilder = new StringBuilder();
-
+		List<StringBuilder> responseList = new ArrayList<StringBuilder>();
+		
 		for (Pedido pedido : pedidos) {
-
+			StringBuilder responseBuilder = new StringBuilder();
+			StringBuilder errorBuilder = new StringBuilder();
+			
 			try {
 
 				Optional<Pedido> pedidoExistente = pedidoRepository.findByNumeroControle(pedido.getNumeroControle());
 
 				if (pedidoExistente.isPresent()) {
-					responseBuilder.append("Número de controle já cadastrado para o pedido: ")
-					.append(pedido.getNumeroControle())
+					errorBuilder.append("Número de controle já cadastrado para o pedido: ")
 					.append("\n");
+					throw new PedidoException(errorBuilder.toString());
 				} else {
 					if (pedido.getDataCadastro() == null) {
 						pedido.setDataCadastro(new Date());
 					}
 
 					if (pedido.getQuantidade() > 10) {
-						responseBuilder.append("Quantidade excede o limite máximo para o pedido: ")
-						.append(pedido.getNumeroControle())
-						.append("\n");
+						errorBuilder.append("Quantidade excede o limite máximo para o pedido: ");
+						throw new PedidoException(errorBuilder.toString());
 					} else if (pedido.getQuantidade() == 0) {
 						pedido.setQuantidade(1);
 					}
@@ -62,17 +63,20 @@ public class PedidoServiceImpl implements PedidoService {
 					.append(pedido.getNumeroControle())
 					.append("\n");
 				}
+				
+				responseList.add(responseBuilder);
 
 			} catch (Exception e) {
-				responseBuilder.append("Erro ao processar o pedido: ")
-				.append(pedido.getNumeroControle())
-				.append(". Detalhes do erro: ")
+				responseBuilder.append("Detalhes do erro: ")
 				.append(e.getMessage())
+				.append(pedido.getNumeroControle())
 				.append("\n");
+				responseList.add(responseBuilder);
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseList.toString());
 			}
 		} 
-
-		return ResponseEntity.status(HttpStatus.OK).body(responseBuilder.toString());
+		
+		return ResponseEntity.status(HttpStatus.OK).body(responseList.toString());
 
 	}
 
@@ -88,13 +92,13 @@ public class PedidoServiceImpl implements PedidoService {
 
 		if (dataCadastro != null) {
 			Date data;
-	        try {
-	            data = new SimpleDateFormat("yyyy-MM-dd").parse(dataCadastro);
-	        } catch (ParseException e) {
-	        	throw new PedidoException("Data inválida");
-	        }
-	        List<Pedido> pedidos = pedidoRepository.findByDataCadastro(data);
-	        return ResponseEntity.status(HttpStatus.OK).body(pedidos);
+			try {
+				data = new SimpleDateFormat("yyyy-MM-dd").parse(dataCadastro);
+			} catch (ParseException e) {
+				throw new PedidoException("Data inválida");
+			}
+			List<Pedido> pedidos = pedidoRepository.findByDataCadastro(data);
+			return ResponseEntity.status(HttpStatus.OK).body(pedidos);
 		}
 
 		if (numeroPedido == null && dataCadastro == null) 
