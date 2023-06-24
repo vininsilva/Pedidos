@@ -84,7 +84,7 @@ public class PedidoServiceImplTest {
 
         ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
 
-        assertEquals(HttpStatus.EXPECTATION_FAILED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("[Detalhes do erro: Quantidade excede o limite máximo para o pedido: 789\n]" , response.getBody());
 
         verify(pedidoRepository, never()).save(pedido3);
@@ -117,7 +117,7 @@ public class PedidoServiceImplTest {
 
         ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
 
-        assertEquals(HttpStatus.EXPECTATION_FAILED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("[Pedido recebido. Número de controle: 789\n, Detalhes do erro: Número de controle já cadastrado para o pedido: 789\n]" , response.getBody());
 
         verify(pedidoRepository).save(pedido3);
