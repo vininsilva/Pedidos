@@ -70,6 +70,7 @@ public class PedidoServiceImpl implements PedidoService {
 				.append(pedido.getNumeroControle())
 				.append("\n");
 				responseList.add(responseBuilder);
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseList.toString());
 			}
 		} 
 

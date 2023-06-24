@@ -29,6 +29,7 @@ public class PedidoServiceImpl implements PedidoService {
 
 	public ResponseEntity<String> receberPedidos(List<Pedido> pedidos) {
 		List<StringBuilder> responseList = new ArrayList<StringBuilder>();
+		List<StringBuilder> errors = new ArrayList<>();
 		
 		for (Pedido pedido : pedidos) {
 			StringBuilder responseBuilder = new StringBuilder();
@@ -61,17 +62,19 @@ public class PedidoServiceImpl implements PedidoService {
 					responseBuilder.append("Pedido recebido. Número de controle: ")
 					.append(pedido.getNumeroControle())
 					.append("\n");
-					responseList.add(responseBuilder);
 				}
+				
+				responseList.add(responseBuilder);
 
 			} catch (Exception e) {
 				responseBuilder.append("Detalhes do erro: ")
 				.append(e.getMessage())
 				.append(pedido.getNumeroControle())
 				.append("\n");
-				responseList.add(responseBuilder);
+				errors.add(responseBuilder);
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseList.toString());
 			}
-		} 
+		}
 
 		return ResponseEntity.status(HttpStatus.OK).body(responseList.toString());
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Rerun testReceberNumeroControleIgual()" project="pedidos" tests="1" started="1" failures="0" errors="0" ignored="0">
+  <testsuite name="br.com.pedidos.PedidoServiceImplTest" time="0.645" displayname="PedidoServiceImplTest" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]">
+    <testcase name="testReceberNumeroControleIgual" classname="br.com.pedidos.PedidoServiceImplTest" time="0.645" displayname="testReceberNumeroControleIgual()" uniqueid="[engine:junit-jupiter]/[class:br.com.pedidos.PedidoServiceImplTest]/[method:testReceberNumeroControleIgual()]"/>
+  </testsuite>
+</testrun>
