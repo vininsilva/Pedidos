@@ -1,6 +1,7 @@
 package br.com.pedidos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +37,7 @@ public class PedidoServiceImplTest {
     public void testReceberPedidos() {
         Pedido pedido1 = new Pedido();
         pedido1.setNumeroControle("123");
+        pedido1.setNome("Produto A");
         pedido1.setDataCadastro(null);
         pedido1.setQuantidade(2);
         pedido1.setValor(10.0);
@@ -43,11 +45,12 @@ public class PedidoServiceImplTest {
 
         Pedido pedido2 = new Pedido();
         pedido2.setNumeroControle("456");
+        pedido2.setNome("Produto B");
         pedido2.setDataCadastro(new Date());
-        pedido2.setQuantidade(8);
+        pedido2.setQuantidade(0);
         pedido2.setValor(5.0);
         pedido2.setCodigoCliente(2);
-
+        
         List<Pedido> pedidos = new ArrayList<>();
         pedidos.add(pedido1);
         pedidos.add(pedido2);
@@ -58,14 +61,72 @@ public class PedidoServiceImplTest {
         ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Pedido recebido. Número de controle: 123\nPedido recebido. Número de controle: 456\n", response.getBody());
+        assertEquals("[Pedido recebido. Número de controle: 123\n, Pedido recebido. Número de controle: 456\n]" , response.getBody());
 
         verify(pedidoRepository).save(pedido1);
         verify(pedidoRepository).save(pedido2);
     }
+    
+    @Test
+    public void testReceberPedidosQuantidadeErrada() { 
+        Pedido pedido3 = new Pedido();
+        pedido3.setNumeroControle("789");
+        pedido3.setNome("Produto C");
+        pedido3.setDataCadastro(new Date());
+        pedido3.setQuantidade(12);
+        pedido3.setValor(7.0);
+        pedido3.setCodigoCliente(3);
+
+        List<Pedido> pedidos = new ArrayList<>();
+        pedidos.add(pedido3);
+
+        when(pedidoRepository.findByNumeroControle("789")).thenReturn(Optional.empty());
+
+        ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
+
+        assertEquals(HttpStatus.EXPECTATION_FAILED, response.getStatusCode());
+        assertEquals("[Detalhes do erro: Quantidade excede o limite máximo para o pedido: 789\n]" , response.getBody());
+
+        verify(pedidoRepository, never()).save(pedido3);
+    }
+    
+    @Test
+    public void testReceberNumeroControleIgual() { 
+        Pedido pedido3 = new Pedido();
+        pedido3.setNumeroControle("789");
+        pedido3.setNome("Produto C");
+        pedido3.setDataCadastro(new Date());
+        pedido3.setQuantidade(10);
+        pedido3.setValor(7.0);
+        pedido3.setCodigoCliente(3);
+        
+        Pedido pedido4 = new Pedido();
+        pedido4.setNumeroControle("789");
+        pedido4.setNome("Produto D");
+        pedido4.setDataCadastro(new Date());
+        pedido4.setQuantidade(5);
+        pedido4.setValor(10.0);
+        pedido4.setCodigoCliente(4);
+
+        List<Pedido> pedidos = new ArrayList<>();
+        pedidos.add(pedido3);
+        pedidos.add(pedido4);
+
+        when(pedidoRepository.findByNumeroControle("789")).thenReturn(Optional.empty())
+        												  .thenReturn(Optional.of(pedido3));
+
+        ResponseEntity<String> response = pedidoService.receberPedidos(pedidos);
+
+        assertEquals(HttpStatus.EXPECTATION_FAILED, response.getStatusCode());
+        assertEquals("[Pedido recebido. Número de controle: 789\n, Detalhes do erro: Número de controle já cadastrado para o pedido: 789\n]" , response.getBody());
+
+        verify(pedidoRepository).save(pedido3);
+        verify(pedidoRepository, never()).save(pedido4);
+        
+    }
 
     @Test
-    public void testConsultarPedidosByNumeroPedido() {
+    public void testConsultarPedidosPorNumeroPedido() {
         String numeroPedido = "123";
 
         List<Pedido> pedidosMock = new ArrayList<>();
@@ -82,7 +143,7 @@ public class PedidoServiceImplTest {
     }
 
     @Test
-    public void testConsultarPedidosByDataCadastro() throws ParseException {
+    public void testConsultarPedidosPorDataCadastro() throws ParseException {
         String dataCadastro = "2023-06-22";
         Date dataMock = new SimpleDateFormat("yyyy-MM-dd").parse(dataCadastro);
 
